@@ -83,6 +83,9 @@ function main(fname::String)
 
     # fixer les variables à 0 et 1 et lancer une recherche exacte
 
+    #rezs = parse_m2SPA_val(LBD)
+    #@show rezs
+
 
     # --------------------------------------------------------------------------
     # Sortie graphique

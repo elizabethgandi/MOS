@@ -62,6 +62,8 @@ function solve2SPA(
     # ---- Querying the results
 
     cardSN = result_count(m2SPA)
+    println("\n\n\n  ooooooo   \n\n\n ")
+    @show typeof(cardSN)
     verbose ? println("  cardSN = $cardSN") : nothing
 
     SN = Array{Number}(undef,2,cardSN)
@@ -121,14 +123,6 @@ function solve2SPA(
     if varType == :Con
         undo_relax()
     end
-
-    #---04/10
-    vect_0::Vector{Int64} = zeros(nbvar)
-    @show n1_vect
-
-    #@show vect_0
-
-
 
     elapsedTime = time()-start
     println("  Elapsed time: $(round(elapsedTime,digits=3))s \n\n ")
