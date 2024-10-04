@@ -86,6 +86,12 @@ function main(fname::String)
     #rezs = parse_m2SPA_val(LBD)
     #@show rezs
 
+    C, A = parse2SPA(fname)
+    new_sol = set2SPA_2(mdYn, C, A)
+    println("\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n")
+    for i=1:length(new_sol)
+        print("x")
+    end
 
     # --------------------------------------------------------------------------
     # Sortie graphique
