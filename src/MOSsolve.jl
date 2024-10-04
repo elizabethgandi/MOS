@@ -117,7 +117,6 @@ function solve2SPA(
             push!(nf_vect,nf)
         end
     end
-    #@show nf_vect
 
     # ---- Restore the integrality constraints on variables if varType == :Con    
     if varType == :Con
