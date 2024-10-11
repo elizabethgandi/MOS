@@ -62,6 +62,9 @@ function solve2SPA(
     # ---- Querying the results
 
     cardSN = result_count(m2SPA)
+
+    fsol = Array{Number}(undef,nbvar,cardSN)
+
     println("\n\n\n  ooooooo   \n\n\n ")
     @show typeof(cardSN)
     verbose ? println("  cardSN = $cardSN") : nothing
@@ -115,6 +118,7 @@ function solve2SPA(
             nothing
         else 
             push!(nf_vect,nf)
+            fsol[:, y] =  x
         end
     end
 
@@ -126,6 +130,6 @@ function solve2SPA(
     elapsedTime = time()-start
     println("  Elapsed time: $(round(elapsedTime,digits=3))s \n\n ")
 
-    return SN, nf_vect, m2SPA
+    return SN, nf_vect, fsol
 end
 
