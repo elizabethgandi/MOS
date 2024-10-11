@@ -49,11 +49,11 @@ function main(fname::String)
  
     if exact
         println("1) calcule Y_N avec methode ϵ-constraint et x∈{0,1}")
-        YN, r = solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Bin)
+        YN, r, mdYn = solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Bin)
         sizeYN = size(YN,2)
 
         println("2) calcule Y_SN avec methode dichotomique et x∈{0,1}")
-        YSN, r = solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Bin)
+        YSN, r, mdYsn = solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Bin)
         sizeYSN = size(YSN,2)
     end
 
@@ -63,11 +63,11 @@ function main(fname::String)
 
     println("3) calcule LB(Y_N) avec methode ϵ-constraint et 0≤x≤1")
     nbProbe = 16
-    LBE, e = solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Con, nbPoints=nbProbe)
+    LBE, e, mdYn = solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Con, nbPoints=nbProbe)
 
     println("4) calcule LB(Y_N) avec methode dichotomique et 0≤x≤1")
     nbProbe = 16
-    LBD, vect_dicho = solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Con, nbPoints=nbProbe)  
+    LBD, vect_dicho, mdYsn = solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Con, nbPoints=nbProbe)  
 
     # --------------------------------------------------------------------------
     # Avancées du 4/10:
@@ -89,6 +89,7 @@ function main(fname::String)
     C, A = parse2SPA(fname)
     new_sol = set2SPA_2(mdYn, C, A)
     println("\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n")
+    @show new_sol
     for i=1:length(new_sol)
         print("x")
     end
@@ -154,13 +155,13 @@ else
     #@time main(target*"/bio"*"sppaa02.txt")
     #@time main(target*"/bio"*"sppnw03.txt")
     #@time main(target*"/bio"*"sppnw04.txt")
-    @time main(target*"/bio"*"sppnw10.txt")
+    #@time main(target*"/bio"*"sppnw10.txt")
     #@time main(target*"/bio"*"sppnw20.txt")
     #@time main(target*"/bio"*"sppnw25.txt")
     #@time main(target*"/bio"*"didactic3.txt")
     #@time main(target*"/bio"*"didactic5.txt")
     #@time main(target*"/bio"*"sppnw29.txt")
-    #@time main(target*"/bio"*"sppnw19.txt")
+    @time main(target*"/bio"*"sppnw19.txt")
     #@time main(target*"/bio"*"sppnw40.txt")
 end
 

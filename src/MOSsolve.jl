@@ -126,6 +126,6 @@ function solve2SPA(
     elapsedTime = time()-start
     println("  Elapsed time: $(round(elapsedTime,digits=3))s \n\n ")
 
-    return SN, nf_vect
+    return SN, nf_vect, m2SPA
 end
 
