@@ -2,7 +2,7 @@
 # ==============================================================================
 
 println("-"^80)
-println("""\nElizabeth et Eliot \n""")
+println("""\nElizabeth et Elliot \n""")
 println("""\nGravityMachine : etude des generateurs \n""")
 
 global verbose    = true
