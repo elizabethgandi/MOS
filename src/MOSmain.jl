@@ -7,7 +7,7 @@ println("""\nGravityMachine : etude des generateurs \n""")
 
 global verbose    = true
 global graphic    = true
-global exact      = true
+global exact      = false
 global experiment = false
 
 print("  verbose.....: "); verbose    ? println("yes") : println("no") 
@@ -63,11 +63,11 @@ function main(fname::String)
 
     println("3) calcule LB(Y_N) avec methode ϵ-constraint et 0≤x≤1")
     nbProbe = 16
-    LBE, e, mdYn = solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Con, nbPoints=nbProbe)
+    LBE, fvar_ϵ, fsol_ϵ = solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Con, nbPoints=nbProbe)
 
     println("4) calcule LB(Y_N) avec methode dichotomique et 0≤x≤1")
     nbProbe = 16
-    LBD, vect_dicho, mdYsn = solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Con, nbPoints=nbProbe)  
+    LBD, fvar_dico, fsol_dico = solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Con, nbPoints=nbProbe)  
 
     # --------------------------------------------------------------------------
     # Avancées du 4/10:
@@ -86,13 +86,20 @@ function main(fname::String)
     #rezs = parse_m2SPA_val(LBD)
     #@show rezs
 
+    println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
+    println("ϵ-constraint generators:\n    floating solution = $(size(fsol_ϵ)[2])\n    nb floating vars = $fvar_ϵ")
     C, A = parse2SPA(fname)
-    new_sol = set2SPA_2(mdYn, C, A)
-    println("\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n")
-    @show new_sol
-    for i=1:length(new_sol)
-        print("x")
-    end
+    new_sol_ϵ, new_val_ϵ = set2SPA_3(fsol_ϵ, C, A)
+    println("   total new feasible solution (may be dominated) = $(length(new_sol_ϵ))")
+
+    println("\nDichotomy generators:\n    floating solution = $(size(fsol_dico)[2])\n    nb floating vars = $fvar_dico")
+    C, A = parse2SPA(fname)
+    new_sol_dico, new_val_dico = set2SPA_3(fsol_dico, C, A)
+    println("   total new feasible solution (may be dominated) = $(length(new_sol_dico))")
+
+
+
+    # println("sol = $(length(mdLBD)), vect_dicho = $vect_dicho")
 
     # --------------------------------------------------------------------------
     # Sortie graphique
@@ -116,8 +123,26 @@ function main(fname::String)
         # LBD : generteurs obtenus avec une dichotomie
         plot(LBD[1,:], LBD[2,:], c="blue", marker="o", linestyle="dotted", label=L"$LB$ dic", markersize=5) 
 
-        legend() 
 
+        if length(new_val_ϵ) ≥ 1
+            scatter(new_val_ϵ[1][1], new_val_ϵ[1][2], c="purple", marker="*", s=80, label="ϵ-cst new sol")
+            if length(new_val_ϵ) ≥ 2
+                for i=2:length(new_val_ϵ)
+                    scatter(new_val_ϵ[i][1], new_val_ϵ[i][2], c="purple", marker="*", s=80)
+                end 
+            end
+        end
+
+        if length(new_val_dico) ≥ 1
+            scatter(new_val_dico[1][1], new_val_dico[1][2], c="cyan", marker="*", s=80, label="dico new sol")
+            if length(new_val_dico) ≥ 2
+                for i=2:length(new_val_dico)
+                    scatter(new_val_dico[i][1], new_val_dico[i][2], c="cyan", marker="*", s=80)
+                end 
+            end
+        end
+
+        legend() 
     end
 
     return nothing
@@ -154,14 +179,14 @@ if experiment
 else
     #@time main(target*"/bio"*"sppaa02.txt")
     #@time main(target*"/bio"*"sppnw03.txt")
-    #@time main(target*"/bio"*"sppnw04.txt")
+    @time main(target*"/bio"*"sppnw04.txt")
     #@time main(target*"/bio"*"sppnw10.txt")
     #@time main(target*"/bio"*"sppnw20.txt")
     #@time main(target*"/bio"*"sppnw25.txt")
     #@time main(target*"/bio"*"didactic3.txt")
     #@time main(target*"/bio"*"didactic5.txt")
     #@time main(target*"/bio"*"sppnw29.txt")
-    @time main(target*"/bio"*"sppnw19.txt")
+    #@time main(target*"/bio"*"sppnw19.txt")
     #@time main(target*"/bio"*"sppnw40.txt")
 end
 
