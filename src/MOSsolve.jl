@@ -2,7 +2,7 @@
 # ==============================================================================
 # compute S_N for a 2SPA (JuMP/MOA model) for methods and options selected
 
-function solve2SPA(  
+function solve2SPA(
     m2SPA::Model,          # a 2SPA model
     solverMIP::Symbol,     # MIP solver to use (:GLPK or :Gurobi)
     methodMOA::Symbol,     # MOA method to use (:EpsilonConstraint or :Dichotomy or :Lexicographic)
@@ -63,7 +63,7 @@ function solve2SPA(
 
     cardSN = result_count(m2SPA)
 
-    fsol = Array{Number}(undef,nbvar,cardSN)
+    fsol = zeros(Number,nbvar,cardSN)
 
     println("\n\n\n  ooooooo   \n\n\n ")
     @show typeof(cardSN)
@@ -74,8 +74,8 @@ function solve2SPA(
     for i in 1:cardSN
 
         if varType == :Bin
-            SN[1,i] = convert(Int64,value(m2SPA[:obj1]; result = i))
-            SN[2,i] = convert(Int64,value(m2SPA[:obj2]; result = i))
+            SN[1,i] = round(Int64,value(m2SPA[:obj1]; result = i))
+            SN[2,i] = round(Int64,value(m2SPA[:obj2]; result = i))
             verbose ? @printf("  %3d: z=[%6d,%6d] | ", i, SN[1,i], SN[2,i]) : nothing
         else
             SN[1,i] = value(m2SPA[:obj1]; result = i)
