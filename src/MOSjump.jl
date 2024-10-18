@@ -149,7 +149,8 @@ end
 # For each generator floating point compute an integer solution.
 # change the objective to minimize the number of variable with different value of "x"
 function set2SPA_penality(generator::tChainList{Float64}, C::Array{Int,2}, A::Array{Int,2}, obj::tGravityWay = ONE, env::Gurobi.Env = Gurobi.Env())
-    res::tChainList{Int64} = tChainList(Int64, true) # list of integer solution (keep all solution in lexicographic order)
+    res     ::tChainList{Int64} = tChainList(Int64, true) # list of integer solution (keep all solution in lexicographic order)
+    opti    ::tChainList{Int64} = tChainList(Int64, false) # list of integer solution (keep all solution in lexicographic order)
 
     current::Union{tNode{Float64}, Nothing} = generator.head
 
@@ -196,6 +197,10 @@ function set2SPA_penality(generator::tChainList{Float64}, C::Array{Int,2}, A::Ar
 
             optimize!(m2SPA_2)
 
+            opti_x = value.(m2SPA_2[:x])
+            opti_y = [sum([opti_x[i] * C[1, i] for i=1:nbvar]), sum([opti_x[i] * C[2, i] for i=1:nbvar])]
+            add!(opti, tSolution{Int64}(opti_x, opti_y))
+
             nb_sol = result_count(m2SPA_2)
             
             println("    → resolution status = $(termination_status(m2SPA_2)), feasible sol count = $(nb_sol)")
@@ -213,7 +218,7 @@ function set2SPA_penality(generator::tChainList{Float64}, C::Array{Int,2}, A::Ar
         current = current.next
     end
 
-    return res
+    return res, opti
 end
 
 function set2SPA_penality_fixedzeros(generator::tChainList{Float64}, C::Array{Int,2}, A::Array{Int,2}, obj::tGravityWay = ONE, env::Gurobi.Env = Gurobi.Env())

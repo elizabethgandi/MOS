@@ -113,25 +113,28 @@ function main(fname::String)
 
     println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
     println("ϵ-constraint and Dichotomy for a total of $(generator.length) generators:")
-    new_sol_one = set2SPA_penality(generator, C, A, ONE)
+    new_sol_one, opti_one = set2SPA_penality(generator, C, A, ONE)
     println("   total new feasible solution (may be dominated, or equal) = $(new_sol_one.length)")
-    _, y_ones = to_array(new_sol_one)
+    _, y_ones       = to_array(new_sol_one)
+    _, y_ones_opti  = to_array(opti_one)
     println("Solutions: $(y_ones[1, :])\n           $(y_ones[2, :]) → Note that there is $(count_equiv(new_sol_one)) equivalent solutions.")
 
 
     println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
     println("ϵ-constraint and Dichotomy for a total of $(generator.length) generators:")
-    new_sol_wsum = set2SPA_penality(generator, C, A, WSUM)
+    new_sol_wsum, opti_wsum = set2SPA_penality(generator, C, A, WSUM)
     println("   total new feasible solution (may be dominated, or equal) = $(new_sol_wsum.length)")
-    _, y_wsum = to_array(new_sol_wsum)
+    _, y_wsum       = to_array(new_sol_wsum)
+    _, y_wsum_opti  = to_array(opti_wsum)
     println("Solutions: $(y_wsum[1, :])\n           $(y_wsum[2, :]) → Note that there is $(count_equiv(new_sol_wsum)) equivalent solutions.")
 
 
     println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
     println("ϵ-constraint and Dichotomy for a total of $(generator.length) generators:")
-    new_sol_wspa = set2SPA_penality(generator, C, A, SPA)
+    new_sol_wspa, opti_wspa = set2SPA_penality(generator, C, A, SPA)
     println("   total new feasible solution (may be dominated, or equal) = $(new_sol_wspa.length)")
-    _, y_wspa = to_array(new_sol_wspa)
+    _, y_wspa       = to_array(new_sol_wspa)
+    _, y_wspa_opti  = to_array(opti_wspa)
     println("Solutions: $(y_wspa[1, :])\n           $(y_wspa[2, :])\n → Note that there is $(count_equiv(new_sol_wspa)) equivalent solutions.")
 
 
@@ -155,7 +158,7 @@ function main(fname::String)
 
         if exact
             # YN : all non-dominated points
-            scatter(YN[1,:], YN[2,:], c="lime", s=50, label=L"$Y_N$")
+            scatter(YN[1,:], YN[2,:], c="lime", s=25, label=L"$Y_N$")
             # YSN : all non-dominated supported points
             plot(YSN[1,:], YSN[2,:], c="green", mec="lime", marker="o", linestyle="dotted", label=L"$Y_{SN}$", markersize=7) 
         end
@@ -184,9 +187,14 @@ function main(fname::String)
         #     end
         # end
 
-        scatter(y_ones[1, :], y_ones[2, :], c="orange"  , marker="1", s=120, label="new sol ones")
-        scatter(y_wsum[1, :], y_wsum[2, :], c="cyan"    , marker="2", s=120, label="new sol wsum")
-        scatter(y_wspa[1, :], y_wspa[2, :], c="purple"  , marker="3", s=120, label="new sol wspa")
+        scatter(y_ones_opti[1, :], y_ones_opti[2, :], c="chocolate"     , marker="*", s=100, label="opti ones")
+        scatter(y_wsum_opti[1, :], y_wsum_opti[2, :], c="cyan"          , marker="*", s=100, label="opti wsum")
+        scatter(y_wspa_opti[1, :], y_wspa_opti[2, :], c="mediumpurple"  , marker="*", s=100, label="opti wspa")
+
+        scatter(y_ones[1, :], y_ones[2, :], c="saddlebrown"     , marker="1", s=100, label="new sol ones")        
+        scatter(y_wsum[1, :], y_wsum[2, :], c="darkturquoise"   , marker="2", s=100, label="new sol wsum")
+        scatter(y_wspa[1, :], y_wspa[2, :], c="rebeccapurple"   , marker="3", s=100, label="new sol wspa")
+
 
 
         legend() 
@@ -228,13 +236,13 @@ else
     #@time main(target*"/bio"*"sppnw03.txt")
     #@time main(target*"/bio"*"sppnw04.txt")
     #@time main(target*"/bio"*"sppnw10.txt")
-    #@time main(target*"/bio"*"sppnw20.txt")
+    @time main(target*"/bio"*"sppnw20.txt")
     #@time main(target*"/bio"*"sppnw25.txt")
     #@time main(target*"/bio"*"didactic3.txt")
     #@time main(target*"/bio"*"didactic5.txt")
     #@time main(target*"/bio"*"sppnw29.txt")
     #@time main(target*"/bio"*"sppnw19.txt")
-    @time main(target*"/bio"*"sppnw40.txt")
+    #@time main(target*"/bio"*"sppnw40.txt")
 end
 
 nothing
