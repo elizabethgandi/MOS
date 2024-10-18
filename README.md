@@ -32,6 +32,6 @@ $$\min \sum_{i \in I} y_i$$
  - **Weighted sum: (wsum)** the penality will be proportional to each objective function: 
 $$\min \sum_{j \in J} y_j \cdot \frac{c_{1j} + c_{2j}}{\max_{k \in I}(c_{1k}) + \max_{k \in I}(c_{2k})}$$
  - **SPA interest: (wspa)** the penality will depend on the intterest toward the variable in the context of a SPA problem:
-$$ \sum_{i \in I} y_i \cdot \frac{c_{1i} + c_{2i}}{\sum_{j \in J} A_{ij}}$$
+$$\min \sum_{i \in I} y_i \cdot \frac{c_{1i} + c_{2i}}{\sum_{j \in J} A_{ij}}$$
 
 ![sppaa02-filtered-opti.png](SPA/results/sppaa02-filtered-opti.png)
