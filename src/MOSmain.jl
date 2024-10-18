@@ -5,19 +5,21 @@ println("-"^80)
 println("""\nElizabeth et Elliot \n""")
 println("""\nGravityMachine : etude des generateurs \n""")
 
-global verbose    = true
-global graphic    = true
-global exact      = true
-global experiment = false
-
+global verbose           = true
+global graphic           = true
+global exact             = true
+global experiment        = false
 global dichotomique      = true
-global 2resolutions      = false
-global penalite_ponderee = false
+global deux_resolutions  = true
+global penalite_ponderee = true
 
-print("  verbose.....: "); verbose    ? println("yes") : println("no") 
-print("  graphics....: "); graphic    ? println("yes") : println("no") 
-print("  exact.......: "); exact      ? println("yes") : println("no") 
-print("  experiment..: "); experiment ? println("yes") : println("no") 
+print("  verbose............: "); verbose           ? println("yes") : println("no") 
+print("  graphics...........: "); graphic           ? println("yes") : println("no") 
+print("  exact..............: "); exact             ? println("yes") : println("no") 
+print("  experiment.........: "); experiment        ? println("yes") : println("no")
+print("  dichotomique.......: "); dichotomique      ? println("yes") : println("no") 
+print("  deux_resolutions...: "); deux_resolutions  ? println("yes") : println("no") 
+print("  penalite_ponderee..: "); penalite_ponderee ? println("yes") : println("no") 
 
 println("\n\n-) Activation des packages necessaires\n")
 using JuMP, GLPK, Gurobi
@@ -82,8 +84,8 @@ function main(fname::String)
     # --------------------------------------------------------------------------
 
     # PISTE 2: FIXATION DES 0 À 0 ET RESOLUTION EXACTE SUR LES VALEURS À FRAC ET 1
-    if 2resolutions
-        println("\nPISTE 2: 2resolutions ------------------------------------------------------------\n")
+    if deux_resolutions
+        println("\nPISTE 2: deux_resolutions ----------------------------------------------------\n")
     end
 
 
