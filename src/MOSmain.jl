@@ -80,11 +80,14 @@ function main(fname::String)
     #@show vect_fract
     #@show vect_1
     #@show vect_0
+    # --------------------------------------------------------------------------
 
-    # fixer les variables à 0 et 1 et lancer une recherche exacte
+    # PISTE 2: FIXATION DES 0 À 0 ET RESOLUTION EXACTE SUR LES VALEURS À FRAC ET 1
+    println("\nPISTE 2 --------------------------------------------------------------------------\n")
 
-    #rezs = parse_m2SPA_val(LBD)
-    #@show rezs
+
+    # PISTE 3: PÉNALISATION DES 0 ET 1 
+    println("\nPISTE 3 --------------------------------------------------------------------------\n")
 
     println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
     println("ϵ-constraint generators:\n    floating solution = $(size(fsol_ϵ)[2])\n    nb floating vars = $fvar_ϵ")
@@ -123,7 +126,7 @@ function main(fname::String)
         # LBD : generteurs obtenus avec une dichotomie
         plot(LBD[1,:], LBD[2,:], c="blue", marker="o", linestyle="dotted", label=L"$LB$ dic", markersize=5) 
 
-
+#PLOT PISTE 3
         if length(new_val_ϵ) ≥ 1
             scatter(new_val_ϵ[1][1], new_val_ϵ[1][2], c="purple", marker="*", s=80, label="ϵ-cst new sol")
             if length(new_val_ϵ) ≥ 2
@@ -141,7 +144,6 @@ function main(fname::String)
                 end 
             end
         end
-
         legend() 
     end
 
@@ -178,8 +180,8 @@ if experiment
     numericalExperiment(target)
 else
     #@time main(target*"/bio"*"sppaa02.txt")
-    #@time main(target*"/bio"*"sppnw03.txt")
-    @time main(target*"/bio"*"sppnw04.txt")
+    @time main(target*"/bio"*"sppnw03.txt")
+    #@time main(target*"/bio"*"sppnw04.txt")
     #@time main(target*"/bio"*"sppnw10.txt")
     #@time main(target*"/bio"*"sppnw20.txt")
     #@time main(target*"/bio"*"sppnw25.txt")
