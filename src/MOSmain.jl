@@ -149,24 +149,24 @@ function main(fname::String)
 
         if exact
             # YN : all non-dominated points
-            scatter(YN[1,:], YN[2,:], c="lime", s=25, label=L"$Y_N$")
+            scatter(YN[1,:], YN[2,:], c="lime", s=25, label=L"$Y_N$", zorder=1)
             # YSN : all non-dominated supported points
-            plot(YSN[1,:], YSN[2,:], c="green", mec="lime", marker="o", linestyle="dotted", label=L"$Y_{SN}$", markersize=7) 
+            plot(YSN[1,:], YSN[2,:], c="green", mec="lime", marker="o", linestyle="dotted", label=L"$Y_{SN}$", markersize=7, zorder=2) 
         end
 
         # LBE : generateurs obtenus avec une ϵ-constraint simple avec un pas predefini (-> echantillonnage)
-        scatter(LBE[1,:], LBE[2,:], c="red", marker="x", s=80, label=L"$LB$ eps") 
+        scatter(LBE[1,:], LBE[2,:], c="red", marker="x", s=80, label=L"$LB$ eps", zorder=3) 
         # LBD : generteurs obtenus avec une dichotomie
-        plot(LBD[1,:], LBD[2,:], c="blue", marker="o", linestyle="dotted", label=L"$LB$ dic", markersize=5) 
+        plot(LBD[1,:], LBD[2,:], c="blue", marker="o", linestyle="dotted", label=L"$LB$ dic", markersize=5, zorder=4) 
 
         if penalite_ponderee
-            scatter(y_ones_opti[1, :], y_ones_opti[2, :], c="chocolate"     , marker="*", s=100, label="opti ones")
-            scatter(y_wsum_opti[1, :], y_wsum_opti[2, :], c="cyan"          , marker="*", s=100, label="opti wsum")
-            scatter(y_wspa_opti[1, :], y_wspa_opti[2, :], c="mediumpurple"  , marker="*", s=100, label="opti wspa")
+            scatter(y_ones_opti[1, :], y_ones_opti[2, :], c="chocolate"     , marker="*", s=80, label="opti ones", zorder=5)
+            scatter(y_wsum_opti[1, :], y_wsum_opti[2, :], c="darkturquoise"          , marker="*", s=80, label="opti wsum", zorder=6)
+            scatter(y_wspa_opti[1, :], y_wspa_opti[2, :], c="mediumpurple"  , marker="*", s=80, label="opti wspa", zorder=7)
 
-            scatter(y_ones[1, :], y_ones[2, :], c="saddlebrown"     , marker="1", s=100, label="new sol ones")        
-            scatter(y_wsum[1, :], y_wsum[2, :], c="darkturquoise"   , marker="2", s=100, label="new sol wsum")
-            scatter(y_wspa[1, :], y_wspa[2, :], c="rebeccapurple"   , marker="3", s=100, label="new sol wspa")
+            scatter(y_ones[1, :], y_ones[2, :], c="saddlebrown"     , marker="1", s=80, label="new sol ones", zorder=8)        
+            scatter(y_wsum[1, :], y_wsum[2, :], c="cadetblue"   , marker="2", s=80, label="new sol wsum", zorder=9)
+            scatter(y_wspa[1, :], y_wspa[2, :], c="rebeccapurple"   , marker="3", s=80, label="new sol wspa", zorder=10)
         end
 
         legend() 
@@ -209,13 +209,13 @@ else
     #@time main(target*"/bio"*"sppnw03.txt")
     #@time main(target*"/bio"*"sppnw04.txt")
     #@time main(target*"/bio"*"sppnw10.txt")
-    @time main(target*"/bio"*"sppnw20.txt")
+    #@time main(target*"/bio"*"sppnw20.txt")
     #@time main(target*"/bio"*"sppnw25.txt")
     #@time main(target*"/bio"*"didactic3.txt")
     #@time main(target*"/bio"*"didactic5.txt")
     #@time main(target*"/bio"*"sppnw29.txt")
     #@time main(target*"/bio"*"sppnw19.txt")
-    #@time main(target*"/bio"*"sppnw40.txt")
+    @time main(target*"/bio"*"sppnw40.txt")
 end
 
 nothing
