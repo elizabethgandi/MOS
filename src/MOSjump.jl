@@ -84,67 +84,6 @@ function set2SPA_2(sols, C::Array{Int,2}, A::Array{Int,2})
     return res, obj
 end
 
-# penality for zros that changes to ones and one that changes to zeros
-function set2SPA_3(sols, C::Array{Int,2}, A::Array{Int,2}, env::Gurobi.Env = Gurobi.Env())
-    res = []
-    obj = []
-
-    _, n::Int64 = size(sols)
-
-    # println("n = $n")
-
-    for s = 1:n
-        not_used::Vector{Int64} = findall(x -> x == 0, sols[:, s])
-        used::Vector{Int64} = findall(x -> x == 1, sols[:, s])
-        frac::Vector{Int64} = findall(x -> 0 < x < 1, sols[:, s])
-
-        penalized::Vector{Int64} = [not_used; used]
-
-        frac = [frac; used]
-
-        if length(frac) > 0
-
-            nbctr, nbvar = size(A)
-            m2SPA_2 = Model(() -> Gurobi.Optimizer(env))
-            
-            @variable(m2SPA_2, x[1:nbvar], Bin)
-            @variable(m2SPA_2, y[1:nbvar], Bin)
-            
-            @objective(m2SPA_2, Min, sum(y))
-
-            @constraint(m2SPA_2, [i=1:nbctr],(sum((x[j]*A[i,j]) for j in 1:nbvar)) == 1) 
-
-            for i in not_used
-                @constraint(m2SPA_2, x[i] ≤ y[i])
-            end
-
-            for i in used
-                @constraint(m2SPA_2, x[i] ≥ 1 - y[i])
-            end
-
-            set_silent(m2SPA_2)
-
-            optimize!(m2SPA_2)
-
-            nb_sol = result_count(m2SPA_2)
-            
-            println("    → resolution status = $(termination_status(m2SPA_2)), feasible sol count = $(nb_sol)")
-            
-            for i=1:nb_sol
-                tmp = zeros(Int64, nbvar)
-                for (k, e) in enumerate(value.(m2SPA_2[:x]; result = i))
-                    if e >= 0.7
-                        tmp[k] = 1
-                    end
-                end
-                push!(res, tmp)
-                push!(obj, (sum([tmp[i] * C[1, i] for i=1:nbvar]), sum([tmp[i] * C[2, i] for i=1:nbvar])))
-            end
-        end
-    end
-
-    return res, obj
-end
 
 # ==============================================================================
 
