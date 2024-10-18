@@ -65,7 +65,7 @@ function solve2SPA(
 
     fsol = zeros(Number,nbvar,cardSN)
 
-    println("\n\n\n  ooooooo   \n\n\n ")
+    #println("\n\n\n  ooooooo   \n\n\n ")
     @show typeof(cardSN)
     verbose ? println("  cardSN = $cardSN") : nothing
 

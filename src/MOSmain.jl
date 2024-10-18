@@ -5,15 +5,21 @@ println("-"^80)
 println("""\nElizabeth et Elliot \n""")
 println("""\nGravityMachine : etude des generateurs \n""")
 
-global verbose    = true
-global graphic    = true
-global exact      = true
-global experiment = false
+global verbose           = true
+global graphic           = true
+global exact             = true
+global experiment        = false
+global dichotomique      = true
+global deux_resolutions  = true
+global penalite_ponderee = true
 
-print("  verbose.....: "); verbose    ? println("yes") : println("no") 
-print("  graphics....: "); graphic    ? println("yes") : println("no") 
-print("  exact.......: "); exact      ? println("yes") : println("no") 
-print("  experiment..: "); experiment ? println("yes") : println("no") 
+print("  verbose............: "); verbose           ? println("yes") : println("no") 
+print("  graphics...........: "); graphic           ? println("yes") : println("no") 
+print("  exact..............: "); exact             ? println("yes") : println("no") 
+print("  experiment.........: "); experiment        ? println("yes") : println("no")
+print("  dichotomique.......: "); dichotomique      ? println("yes") : println("no") 
+print("  deux_resolutions...: "); deux_resolutions  ? println("yes") : println("no") 
+print("  penalite_ponderee..: "); penalite_ponderee ? println("yes") : println("no") 
 
 println("\n\n-) Activation des packages necessaires\n")
 using JuMP, GLPK, Gurobi
@@ -44,6 +50,11 @@ function main(fname::String)
     println("  nbvar    = ",num_variables(m2SPA))
     println("  nbctr    = ",num_constraints(m2SPA, AffExpr, MOI.EqualTo{Float64}),"\n\n")  
 
+    if (dichotomique == false) 
+        println("IMPOSSIBILITE: On a besoin de la méthode dichotomique")
+
+        return nothing
+    end
 
     # --------------------------------------------------------------------------
     # Calcul de Y_N et Y_SN
@@ -71,73 +82,56 @@ function main(fname::String)
     LBD, fvar_dico, fsol_dico = solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Con, nbPoints=nbProbe)  
 
     # --------------------------------------------------------------------------
-    # Avancées du 4/10:
-    #@show LBD
-    #@show vect_dicho
-    #vect_fract::Vector{Int64} = findall(x->x>1,vect_dicho)
-    #vect_1::Vector{Int64} = findall(x->x==1,vect_dicho)
-    #vect_0::Vector{Int64} = zeros(nbVar)
 
-    #@show vect_fract
-    #@show vect_1
-    #@show vect_0
-
-    # fixer les variables à 0 et 1 et lancer une recherche exacte
-
-    #rezs = parse_m2SPA_val(LBD)
-    #@show rezs
-
-    # println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
-    # println("ϵ-constraint generators:\n    floating solution = $(size(fsol_ϵ)[2])\n    nb floating vars = $fvar_ϵ")
-    # C, A = parse2SPA(fname)
-    # new_sol_ϵ, new_val_ϵ = set2SPA_3(fsol_ϵ, C, A)
-    # println("   total new feasible solution (may be dominated) = $(length(new_sol_ϵ))")
-
-    # println("\nDichotomy generators:\n    floating solution = $(size(fsol_dico)[2])\n    nb floating vars = $fvar_dico")
-    # C, A = parse2SPA(fname)
-    # new_sol_dico, new_val_dico = set2SPA_3(fsol_dico, C, A)
-    # println("   total new feasible solution (may be dominated) = $(length(new_sol_dico))")
-
-    generator::tChainList{Float64} = tChainList(Float64)
-    _, nbSol_LBE = size(LBE)
-    # println("ϵ ->  $(fsol_ϵ)\n$(LBE)")
-    for i=1:nbSol_LBE
-        add!(generator, tSolution{Float64}(fsol_ϵ[:, i], LBE[:, i]))
+    # PISTE 2: FIXATION DES 0 À 0 ET RESOLUTION EXACTE SUR LES VALEURS À FRAC ET 1
+    if deux_resolutions
+        println("\nPISTE 2: deux_resolutions ----------------------------------------------------\n")
     end
-    _, nbSol_LBD = size(LBD)
-    # println("ϵ ->  $(fsol_dico)\n$(LBD)")
-    for i=1:nbSol_LBD
-        add!(generator, tSolution{Float64}(fsol_dico[:, i], LBD[:, i]))
+
+
+    # PISTE 3: PÉNALISATION DES 0 ET 1 
+    if penalite_ponderee
+        println("\nPISTE 3: Pénalité pondérée ---------------------------------------------------\n")
+
+        generator::tChainList{Float64} = tChainList(Float64)
+        _, nbSol_LBE = size(LBE)
+        # println("ϵ ->  $(fsol_ϵ)\n$(LBE)")
+        for i=1:nbSol_LBE
+            add!(generator, tSolution{Float64}(fsol_ϵ[:, i], LBE[:, i]))
+        end
+        _, nbSol_LBD = size(LBD)
+        # println("ϵ ->  $(fsol_dico)\n$(LBD)")
+        for i=1:nbSol_LBD
+            add!(generator, tSolution{Float64}(fsol_dico[:, i], LBD[:, i]))
+        end
+        C, A = parse2SPA(fname)
+
+        println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
+        println("ϵ-constraint and Dichotomy for a total of $(generator.length) generators:")
+        new_sol_one, opti_one = set2SPA_penality(generator, C, A, ONE)
+        println("   total new feasible solution (may be dominated, or equal) = $(new_sol_one.length)")
+        _, y_ones       = to_array(new_sol_one)
+        _, y_ones_opti  = to_array(opti_one)
+        println("Solutions: $(y_ones[1, :])\n           $(y_ones[2, :]) → Note that there is $(count_equiv(new_sol_one)) equivalent solutions.")
+
+
+        println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
+        println("ϵ-constraint and Dichotomy for a total of $(generator.length) generators:")
+        new_sol_wsum, opti_wsum = set2SPA_penality(generator, C, A, WSUM)
+        println("   total new feasible solution (may be dominated, or equal) = $(new_sol_wsum.length)")
+        _, y_wsum       = to_array(new_sol_wsum)
+        _, y_wsum_opti  = to_array(opti_wsum)
+        println("Solutions: $(y_wsum[1, :])\n           $(y_wsum[2, :]) → Note that there is $(count_equiv(new_sol_wsum)) equivalent solutions.")
+
+
+        println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
+        println("ϵ-constraint and Dichotomy for a total of $(generator.length) generators:")
+        new_sol_wspa, opti_wspa = set2SPA_penality(generator, C, A, SPA)
+        println("   total new feasible solution (may be dominated, or equal) = $(new_sol_wspa.length)")
+        _, y_wspa       = to_array(new_sol_wspa)
+        _, y_wspa_opti  = to_array(opti_wspa)
+        println("Solutions: $(y_wspa[1, :])\n           $(y_wspa[2, :])\n → Note that there is $(count_equiv(new_sol_wspa)) equivalent solutions.")
     end
-    C, A = parse2SPA(fname)
-
-    println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
-    println("ϵ-constraint and Dichotomy for a total of $(generator.length) generators:")
-    new_sol_one, opti_one = set2SPA_penality(generator, C, A, ONE)
-    println("   total new feasible solution (may be dominated, or equal) = $(new_sol_one.length)")
-    _, y_ones       = to_array(new_sol_one)
-    _, y_ones_opti  = to_array(opti_one)
-    println("Solutions: $(y_ones[1, :])\n           $(y_ones[2, :]) → Note that there is $(count_equiv(new_sol_one)) equivalent solutions.")
-
-
-    println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
-    println("ϵ-constraint and Dichotomy for a total of $(generator.length) generators:")
-    new_sol_wsum, opti_wsum = set2SPA_penality(generator, C, A, WSUM)
-    println("   total new feasible solution (may be dominated, or equal) = $(new_sol_wsum.length)")
-    _, y_wsum       = to_array(new_sol_wsum)
-    _, y_wsum_opti  = to_array(opti_wsum)
-    println("Solutions: $(y_wsum[1, :])\n           $(y_wsum[2, :]) → Note that there is $(count_equiv(new_sol_wsum)) equivalent solutions.")
-
-
-    println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
-    println("ϵ-constraint and Dichotomy for a total of $(generator.length) generators:")
-    new_sol_wspa, opti_wspa = set2SPA_penality(generator, C, A, SPA)
-    println("   total new feasible solution (may be dominated, or equal) = $(new_sol_wspa.length)")
-    _, y_wspa       = to_array(new_sol_wspa)
-    _, y_wspa_opti  = to_array(opti_wspa)
-    println("Solutions: $(y_wspa[1, :])\n           $(y_wspa[2, :])\n → Note that there is $(count_equiv(new_sol_wspa)) equivalent solutions.")
-
-
 
     # println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
     # println("ϵ-constraint and Dichotomy for a total of $(generator.length) generators:")
@@ -168,34 +162,15 @@ function main(fname::String)
         # LBD : generteurs obtenus avec une dichotomie
         plot(LBD[1,:], LBD[2,:], c="blue", marker="o", linestyle="dotted", label=L"$LB$ dic", markersize=5) 
 
+        if penalite_ponderee
+            scatter(y_ones_opti[1, :], y_ones_opti[2, :], c="chocolate"     , marker="*", s=100, label="opti ones")
+            scatter(y_wsum_opti[1, :], y_wsum_opti[2, :], c="cyan"          , marker="*", s=100, label="opti wsum")
+            scatter(y_wspa_opti[1, :], y_wspa_opti[2, :], c="mediumpurple"  , marker="*", s=100, label="opti wspa")
 
-        # if length(new_val_ϵ) ≥ 1
-        #     scatter(new_val_ϵ[1][1], new_val_ϵ[1][2], c="purple", marker="*", s=80, label="ϵ-cst new sol")
-        #     if length(new_val_ϵ) ≥ 2
-        #         for i=2:length(new_val_ϵ)
-        #             scatter(new_val_ϵ[i][1], new_val_ϵ[i][2], c="purple", marker="*", s=80)
-        #         end 
-        #     end
-        # end
-
-        # if length(new_val_dico) ≥ 1
-        #     scatter(new_val_dico[1][1], new_val_dico[1][2], c="cyan", marker="*", s=80, label="dico new sol")
-        #     if length(new_val_dico) ≥ 2
-        #         for i=2:length(new_val_dico)
-        #             scatter(new_val_dico[i][1], new_val_dico[i][2], c="cyan", marker="*", s=80)
-        #         end 
-        #     end
-        # end
-
-        scatter(y_ones_opti[1, :], y_ones_opti[2, :], c="chocolate"     , marker="*", s=100, label="opti ones")
-        scatter(y_wsum_opti[1, :], y_wsum_opti[2, :], c="cyan"          , marker="*", s=100, label="opti wsum")
-        scatter(y_wspa_opti[1, :], y_wspa_opti[2, :], c="mediumpurple"  , marker="*", s=100, label="opti wspa")
-
-        scatter(y_ones[1, :], y_ones[2, :], c="saddlebrown"     , marker="1", s=100, label="new sol ones")        
-        scatter(y_wsum[1, :], y_wsum[2, :], c="darkturquoise"   , marker="2", s=100, label="new sol wsum")
-        scatter(y_wspa[1, :], y_wspa[2, :], c="rebeccapurple"   , marker="3", s=100, label="new sol wspa")
-
-
+            scatter(y_ones[1, :], y_ones[2, :], c="saddlebrown"     , marker="1", s=100, label="new sol ones")        
+            scatter(y_wsum[1, :], y_wsum[2, :], c="darkturquoise"   , marker="2", s=100, label="new sol wsum")
+            scatter(y_wspa[1, :], y_wspa[2, :], c="rebeccapurple"   , marker="3", s=100, label="new sol wspa")
+        end
 
         legend() 
     end
@@ -233,6 +208,7 @@ if experiment
     numericalExperiment(target)
 else
     #@time main(target*"/bio"*"sppaa02.txt")
+    #@time main(target*"/bio"*"sppnw03.txt")
     #@time main(target*"/bio"*"sppnw03.txt")
     #@time main(target*"/bio"*"sppnw04.txt")
     #@time main(target*"/bio"*"sppnw10.txt")
