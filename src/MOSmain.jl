@@ -89,7 +89,7 @@ function main(fname::String)
     end
 
 
-    # PISTE 3: PÉNALISATION DES 0 ET 1 
+    # PISTE 3: PÉNALISATION DES 0 ET 1
     if penalite_ponderee
         println("\nPISTE 3: Pénalité pondérée ---------------------------------------------------\n")
 
@@ -164,11 +164,11 @@ function main(fname::String)
 
         if penalite_ponderee
             scatter(y_ones_opti[1, :], y_ones_opti[2, :], c="chocolate"     , marker="*", s=80, label="opti ones", zorder=5)
-            scatter(y_wsum_opti[1, :], y_wsum_opti[2, :], c="darkturquoise"          , marker="*", s=80, label="opti wsum", zorder=6)
+            scatter(y_wsum_opti[1, :], y_wsum_opti[2, :], c="darkturquoise" , marker="*", s=80, label="opti wsum", zorder=6)
             scatter(y_wspa_opti[1, :], y_wspa_opti[2, :], c="mediumpurple"  , marker="*", s=80, label="opti wspa", zorder=7)
 
             scatter(y_ones[1, :], y_ones[2, :], c="saddlebrown"     , marker="1", s=80, label="new sol ones", zorder=8)        
-            scatter(y_wsum[1, :], y_wsum[2, :], c="cadetblue"   , marker="2", s=80, label="new sol wsum", zorder=9)
+            scatter(y_wsum[1, :], y_wsum[2, :], c="cadetblue"       , marker="2", s=80, label="new sol wsum", zorder=9)
             scatter(y_wspa[1, :], y_wspa[2, :], c="rebeccapurple"   , marker="3", s=80, label="new sol wspa", zorder=10)
         end
 
