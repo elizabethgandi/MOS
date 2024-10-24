@@ -11,7 +11,7 @@ global exact             = true
 global experiment        = false
 global dichotomique      = true
 global deux_resolutions  = true
-global penalite_ponderee = true
+global penalite_ponderee = false
 
 print("  verbose............: "); verbose           ? println("yes") : println("no") 
 print("  graphics...........: "); graphic           ? println("yes") : println("no") 
@@ -86,6 +86,10 @@ function main(fname::String)
     # PISTE 2: FIXATION DES 0 À 0 ET RESOLUTION EXACTE SUR LES VALEURS À FRAC ET 1
     if deux_resolutions
         println("\nPISTE 2: deux_resolutions ----------------------------------------------------\n")
+
+        C, A = parse2SPA(fname)
+        jsp = solve2SPA_2(m2SPA, fvar_dico, C, A)#, :Gurobi, :Dichotomy, :Con, nbPoints=nbProbe) 
+
     end
 
 
@@ -132,13 +136,6 @@ function main(fname::String)
         _, y_wspa_opti  = to_array(opti_wspa)
         println("Solutions: $(y_wspa[1, :])\n           $(y_wspa[2, :])\n → Note that there is $(count_equiv(new_sol_wspa)) equivalent solutions.")
     end
-
-    # println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
-    # println("ϵ-constraint and Dichotomy for a total of $(generator.length) generators:")
-    # new_sol_fixedones = set2SPA_penality_fixedzeros(generator, C, A, SPA)
-    # println("   total new feasible solution (may be dominated, or equal) = $(new_sol_fixedones.length)")
-
-    # println("sol = $(length(mdLBD)), vect_dicho = $vect_dicho")
 
     # --------------------------------------------------------------------------
     # Sortie graphique
