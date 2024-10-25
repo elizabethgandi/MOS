@@ -92,7 +92,7 @@ function main(fname::String)
     end
 
 
-    # PISTE 3: PÉNALISATION DES 0 ET 1 
+    # PISTE 3: PÉNALISATION DES 0 ET 1
     if penalite_ponderee
         println("\nPISTE 3: Pénalité pondérée ---------------------------------------------------\n")
 
