@@ -11,7 +11,7 @@ global exact             = false
 global experiment        = false
 global dichotomique      = true
 global deux_resolutions  = true
-global penalite_ponderee = true
+global penalite_ponderee = false
 
 print("  verbose............: "); verbose           ? println("yes") : println("no") 
 print("  graphics...........: "); graphic           ? println("yes") : println("no") 
@@ -213,9 +213,9 @@ else
     #@time main(target*"/bio"*"sppnw10.txt")
     #@time main(target*"/bio"*"sppnw20.txt")
     #@time main(target*"/bio"*"sppnw25.txt")
-    #@time main(target*"/bio"*"didactic3.txt")
+    @time main(target*"/bio"*"didactic3.txt")
     #@time main(target*"/bio"*"didactic5.txt")
-    @time main(target*"/bio"*"sppnw29.txt")
+    #@time main(target*"/bio"*"sppnw29.txt")
     #@time main(target*"/bio"*"sppnw19.txt")
     #@time main(target*"/bio"*"sppnw40.txt")
 end

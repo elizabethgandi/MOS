@@ -309,59 +309,6 @@ function set2SPA_penality_fixedones(generator::tChainList{Float64}, C::Array{Int
 end
 
 # ==============================================================================
-
-function set2SPA_4(fvar_dico, x_values, C::Array{Int,2}, A::Array{Int,2}, env::Gurobi.Env = Gurobi.Env())
-
-    print("\n--------------------set2SPA_4--------------------\n")
-
-    @show x_values
-    if length(fvar_dico)>0
-        for frac_set in fvar_dico
-            println("Atchoum")
-
-            println("frac ", frac_set)
-
-            nbctr, nbvar = size(A)
-            mMILP = Model(() -> Gurobi.Optimizer(env))
-
-            # Créer les variables binaires avec fixation de certaines variables
-            @variable(mMILP, x[1:nbvar], Bin)
-
-            # Fixer les variables qui sont à 0
-            for i in 1:nbvar
-                if x_values[i] == 0
-                    fix(x[i], 0.0)
-                end
-            end
-
-            # Objectifs
-            @expression(mMILP, obj1, sum((C[1,i])*x[i] for i in 1:nbvar))
-            @expression(mMILP, obj2, sum((C[2,i])*x[i] for i in 1:nbvar))
-            @objective(mMILP, Min, [obj1, obj2])
-
-            # Contraintes
-            @constraint(mMILP, [i=1:nbctr], (sum((x[j]*A[i,j]) for j in 1:nbvar)) == 1)
-
-            set_silent(mMILP)
-
-            # Résoudre le problème
-            optimize!(mMILP)
-            
-            nb_sol = result_count(mMILP)
-                    
-            println("------->>>> resolution status = $(termination_status(mMILP)), feasible sol count = $(nb_sol)")
-            
-            println("Résolution du modèle MILP avec certaines variables fixées.")
-            println("Statut : ", termination_status(mMILP))
-    end
-
-    else
-        println(" Toutes les variables fractionnaires sont à 0")
-    end
-
-end
-
-# ==============================================================================
 # Create (load) a 2SPA model (bi-objective partionning problem) with JuMP/MOA 
 # from a instance file,  with all variables set to :Bin
 
