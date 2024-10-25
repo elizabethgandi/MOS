@@ -58,21 +58,15 @@ function solve2SPA(
     # ---- Run the solver
     optimize!(m2SPA)
 
-
     # ---- Querying the results
-
-    cardSN = result_count(m2SPA)
-    cardSN0 = cardSN
-
-    fsol = zeros(Number,nbvar,cardSN)
-
-    #println("\n\n\n  ooooooo   \n\n\n ")
-    @show typeof(cardSN)
+    cardSN::Int64 = result_count(m2SPA)
     verbose ? println("  cardSN = $cardSN") : nothing
 
     SN = Array{Number}(undef,2,cardSN)
-    SX = []
-    sumNbFrac = 0.0
+    fsol::Matrix{Number}        = zeros(Number,nbvar,cardSN)
+    SX::Vector{Vector{Float64}} = []
+    sumNbFrac::Float64          = 0.0
+
     for i in 1:cardSN
 
         if varType == :Bin
@@ -94,17 +88,16 @@ function solve2SPA(
 
     verbose ? println("  nbVar = $nbvar  moyNbFrac = ",sumNbFrac/cardSN, " ⇒ ", round(100*sumNbFrac/cardSN/nbvar, digits=2),"%") : nothing
 
-    x_value = []
-    nf = 0
-    n1 = 0
-    n1_vect::Vector{Int64} = Vector{Int64}()
+    nf::Int64              = 0
+    n1::Int64              = 0
     nf_vect::Vector{Int64} = Vector{Int64}()
-    xcount = zeros(nbvar)
+    x::Vector{Float64}     = Vector{Float64}()
+
     @printf("   i:   #0   #1   #f \n")
     for y in 1:cardSN
         n0 = 0; n1 = 0; nf = 0
         x =  value.(m2SPA[:x]; result = y)
-        #x_value = value.(x; result = y)
+
         for j in 1:length(x)
             if     x[j] <= 0.1
                 n0 +=1
@@ -115,12 +108,8 @@ function solve2SPA(
             end
         end
         @printf(" %3d: %4d %4d %4d \n", y, n0, n1, nf)
-
-        push!(n1_vect,n1)
         
-        if (nf == 0)
-            nothing
-        else 
+        if (nf != 0)
             push!(nf_vect,nf)
             fsol[:, y] =  x
         end
@@ -131,40 +120,38 @@ function solve2SPA(
         undo_relax()
     end
 
-    elapsedTime = time()-start
+    elapsedTime::Float64 = time()-start
     println("  Elapsed time: $(round(elapsedTime,digits=3))s \n\n ")
 
-    return SN, nf_vect, fsol, cardSN0, SX
+    return SN, nf_vect, fsol, cardSN, SX
 end
 
 
-
-function fonction_deux_resolutions(cardSN, m2SPA, C, A, SX)
+function fonction_deux_resolutions(cardSN::Int64, m2SPA::Model, C::Array{Int,2}, A::Array{Int,2}, SX::Vector{Vector{Float64}})
     
     nbvar::Int64 = num_variables(m2SPA)
     nbctr::Int64 = num_constraints(m2SPA, AffExpr, MOI.EqualTo{Float64})
 
-    tot_obj_value1::Vector{Float64} = []
-    tot_obj_value2::Vector{Float64} = []
+    tot_obj_value1::Vector{Float64} = Vector{Float64}()
+    tot_obj_value2::Vector{Float64} = Vector{Float64}() 
     
-    λ::Float64 = rand()
+    λ::Float64        = rand()
+    obj_value1::Int64 = 0
+    obj_value2::Int64 = 0
 
     for i in 1:cardSN  
 
         obj_value1 = 0
         obj_value2 = 0
 
-        println("-"^30)
-        println("i : $i")
+        println("\ni : $i")
         
         _, nbFrac, idf = examineVectorVariables2(SX[i]) 
-
-        println("----"^30)
         
         if nbFrac == 0
             println("Réalisable")
 
-            obj_value1 = sum(C[1, j] * SX[i][j] for j in 1:nbvar)  # Calcul de l'objectif
+            obj_value1 = sum(C[1, j] * SX[i][j] for j in 1:nbvar)  
             obj_value2 = sum(C[2, j] * SX[i][j] for j in 1:nbvar)
 
             println("obj Val1: $obj_value1 || obj Val2: $obj_value2 ")
@@ -175,35 +162,22 @@ function fonction_deux_resolutions(cardSN, m2SPA, C, A, SX)
         else
             println("Non Réalisable")
 
-            # Création d'un nouveau modèle
             m2SPA_2 = Model()
-            
-            # Recréation des variables dans le nouveau modèle
             @variable(m2SPA_2, 0.0 <= xPrim[1:nbvar] <= 1.0)
-
-            # Création d'une nouvelle expression pour l'objectif
             @expression(m2SPA_2, obj1λ, sum(λ * C[1, j] * xPrim[j] + (1.0 - λ) * (C[2, j]) * xPrim[j] for j in 1:nbvar))
             @objective(m2SPA_2, Min, obj1λ)
-            
-            # Ajout des contraintes
             @constraint(m2SPA_2, [h = 1:nbctr], sum(xPrim[j] * A[h, j] for j in 1:nbvar) == 1)
             
-            # Conversion des indices fractionnaires en binaires
             for k in idf
-                println("k: $k")
                 set_binary(xPrim[k])
             end
             
-            # Configuration du solveur
             set_optimizer(m2SPA_2, Gurobi.Optimizer)
-            
-            # Optimisation du nouveau modèle
+            set_silent(m2SPA_2)
             optimize!(m2SPA_2)
-                        
             
-            # Vérification du statut de la solution
             if termination_status(m2SPA_2) == OPTIMAL
-                _ , nbFrac, idf = examineVectorVariables2(value.(xPrim))
+                _ , nbFrac, _ = examineVectorVariables2(value.(xPrim))
                 
                 if nbFrac == 0
                     println("SS pb réalisable")
@@ -220,18 +194,17 @@ function fonction_deux_resolutions(cardSN, m2SPA, C, A, SX)
                 end
             end
         end
-       # @show tot_obj_value1, tot_obj_value2
+       println("----"^30)
     end
 
-    # Retourner les solutions réalisables et non réalisables avec leurs valeurs d'objectif associées
     return  tot_obj_value1, tot_obj_value2
 end
 
 
-function evaluerFct(C, nbvar, x)
+function evaluerFct(C::Array{Int,2}, nbvar::Int64, x::Vector{Float64})
 
-    z1 = 0.0
-    z2 = 0.0
+    z1::Float64 = 0.0
+    z2::Float64 = 0.0
 
     for i in 1:nbvar
         z1 += C[1, i]*x[i]

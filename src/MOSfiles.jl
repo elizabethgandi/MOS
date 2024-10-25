@@ -46,11 +46,13 @@ end
 
 function parse2SPA(fname::String)
 
-    f = open(fname)    
-    nbctr, nbvar = parse.(Int, split(readline(f))) # nombre de contraintes , nombre de variables
-    A = zeros(Int, nbctr, nbvar)                   # matrice des contraintes
-    C = zeros(Int, 2,nbvar)                        # matrice des couts
-    nb = zeros(Int, nbvar)
+    f::IOStream       = open(fname)    
+    nbctr::Int64, nbvar::Int64 = parse.(Int, split(readline(f)))   # nombre de contraintes , nombre de variables
+    A::Array{Int,2}   = zeros(Int, nbctr, nbvar)                   # matrice des contraintes
+    C::Array{Int,2}   = zeros(Int, 2,nbvar)                        # matrice des couts
+    nb::Vector{Int64} = zeros(Int, nbvar)
+    flag::Int64=0
+
     for j in 1:nbvar
         flag = 1
         for valeur in split(readline(f))
