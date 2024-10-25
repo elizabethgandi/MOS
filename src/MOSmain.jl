@@ -61,11 +61,11 @@ function main(fname::String)
  
     if exact
         println("1) calcule Y_N avec methode ϵ-constraint et x∈{0,1}")
-        YN, r, mdYn, _, _ = solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Bin)
+        YN, _, _, _, _ = solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Bin)
         sizeYN = size(YN,2)
 
         println("2) calcule Y_SN avec methode dichotomique et x∈{0,1}")
-        YSN, r, mdYsn, _ , _= solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Bin)
+        YSN, _, _, _, _= solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Bin)
         sizeYSN = size(YSN,2)
     end
 
@@ -75,11 +75,11 @@ function main(fname::String)
 
     println("3) calcule LB(Y_N) avec methode ϵ-constraint et 0≤x≤1")
     nbProbe = 16
-    LBE, fvar_ϵ, fsol_ϵ, _, _= solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Con, nbPoints=nbProbe)
+    LBE, _, fsol_ϵ, _, _= solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Con, nbPoints=nbProbe)
 
     println("4) calcule LB(Y_N) avec methode dichotomique et 0≤x≤1")
     nbProbe = 16
-    LBD, fvar_dico, fsol_dico, cardSN, SX = solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Con, nbPoints=nbProbe)  
+    LBD, _, fsol_dico, cardSN, SX = solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Con, nbPoints=nbProbe)  
 
     # --------------------------------------------------------------------------
 
@@ -98,12 +98,10 @@ function main(fname::String)
 
         generator::tChainList{Float64} = tChainList(Float64)
         _, nbSol_LBE = size(LBE)
-        # println("ϵ ->  $(fsol_ϵ)\n$(LBE)")
         for i=1:nbSol_LBE
             add!(generator, tSolution{Float64}(fsol_ϵ[:, i], LBE[:, i]))
         end
         _, nbSol_LBD = size(LBD)
-        # println("ϵ ->  $(fsol_dico)\n$(LBD)")
         for i=1:nbSol_LBD
             add!(generator, tSolution{Float64}(fsol_dico[:, i], LBD[:, i]))
         end
@@ -159,7 +157,7 @@ function main(fname::String)
         plot(LBD[1,:], LBD[2,:], c="blue", marker="o", linestyle="dotted", label=L"$LB$ dic", markersize=5, zorder=4) 
 
         if deux_resolutions
-            scatter(tot1, tot2, c="black", marker="*", s=80, label="Solutions R&R", zorder=5)
+            scatter(tot1, tot2, c="darkgoldenrod", marker="*", s=80, label="Solutions R&R", zorder=5)
         end
 
         if penalite_ponderee
@@ -210,8 +208,8 @@ else
     #@time main(target*"/bio"*"sppaa02.txt")
     #@time main(target*"/bio"*"sppnw03.txt")
     #@time main(target*"/bio"*"sppnw03.txt")
-    @time main(target*"/bio"*"sppnw04.txt")
-    #@time main(target*"/bio"*"sppnw10.txt")
+    #@time main(target*"/bio"*"sppnw04.txt")
+    @time main(target*"/bio"*"sppnw10.txt")
     #@time main(target*"/bio"*"sppnw20.txt")
     #@time main(target*"/bio"*"sppnw25.txt")
     #@time main(target*"/bio"*"didactic3.txt")
