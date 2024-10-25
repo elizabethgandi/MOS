@@ -46,9 +46,12 @@ function main(fname::String)
     println("\n0) instance et dimensions \n")
     println("  instance = $fname") 
    
-    m2SPA = load2SPA(fname)
+    m2SPA::Model = load2SPA(fname)
+    
     println("  nbvar    = ",num_variables(m2SPA))
     println("  nbctr    = ",num_constraints(m2SPA, AffExpr, MOI.EqualTo{Float64}),"\n\n")  
+
+    C::Array{Int,2}, A::Array{Int,2} = parse2SPA(fname)
 
     if (dichotomique == false) 
         println("IMPOSSIBILITE: On a besoin de la méthode dichotomique")
@@ -62,11 +65,9 @@ function main(fname::String)
     if exact
         println("1) calcule Y_N avec methode ϵ-constraint et x∈{0,1}")
         YN, _, _, _, _ = solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Bin)
-        sizeYN = size(YN,2)
 
         println("2) calcule Y_SN avec methode dichotomique et x∈{0,1}")
         YSN, _, _, _, _= solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Bin)
-        sizeYSN = size(YSN,2)
     end
 
 
@@ -86,8 +87,8 @@ function main(fname::String)
     # PISTE 2: FIXATION DES 0 À 0 ET RESOLUTION EXACTE SUR LES VALEURS À FRAC ET 1
     if deux_resolutions
         println("\nPISTE 2: deux_resolutions ----------------------------------------------------\n")
-        C, A = parse2SPA(fname)
-        tot1, tot2 = fonction_deux_resolutions(cardSN, m2SPA, C, A, SX)
+
+        ensemble_solutions_obj1, ensemble_solutions_obj2 = fonction_deux_resolutions(cardSN, m2SPA, C, A, SX)
     end
 
 
@@ -106,7 +107,6 @@ function main(fname::String)
         for i=1:nbSol_LBD
             add!(generator, tSolution{Float64}(fsol_dico[:, i], LBD[:, i]))
         end
-        C, A = parse2SPA(fname)
 
         println("\n========================================< Newly computed solution (1 obj penality method) >========================================")
         println("ϵ-constraint and Dichotomy for a total of $(generator.length) generators:")
@@ -158,7 +158,7 @@ function main(fname::String)
         plot(LBD[1,:], LBD[2,:], c="blue", marker="o", linestyle="dotted", label=L"$LB$ dic", markersize=5, zorder=4) 
 
         if deux_resolutions
-            scatter(tot1, tot2, c="black", marker="*", s=80, label="Solutions R&R", zorder=5)
+            scatter(ensemble_solutions_obj1, ensemble_solutions_obj2, c="black", marker="*", s=80, label="solutions R&R", zorder=5)
         end
 
         if penalite_ponderee
