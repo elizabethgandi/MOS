@@ -7,7 +7,7 @@ println("""\nGravityMachine : etude des generateurs \n""")
 
 global verbose           = true
 global graphic           = true
-global exact             = true
+global exact             = false
 global experiment        = false
 global dichotomique      = true
 global deux_resolutions  = true
@@ -61,11 +61,11 @@ function main(fname::String)
  
     if exact
         println("1) calcule Y_N avec methode ϵ-constraint et x∈{0,1}")
-        YN, r, mdYn = solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Bin)
+        YN, r, mdYn, _, _ = solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Bin)
         sizeYN = size(YN,2)
 
         println("2) calcule Y_SN avec methode dichotomique et x∈{0,1}")
-        YSN, r, mdYsn = solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Bin)
+        YSN, r, mdYsn, _ , _= solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Bin)
         sizeYSN = size(YSN,2)
     end
 
@@ -75,11 +75,11 @@ function main(fname::String)
 
     println("3) calcule LB(Y_N) avec methode ϵ-constraint et 0≤x≤1")
     nbProbe = 16
-    LBE, fvar_ϵ, fsol_ϵ = solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Con, nbPoints=nbProbe)
+    LBE, fvar_ϵ, fsol_ϵ, _, _= solve2SPA(m2SPA, :Gurobi, :EpsilonConstraint, :Con, nbPoints=nbProbe)
 
     println("4) calcule LB(Y_N) avec methode dichotomique et 0≤x≤1")
     nbProbe = 16
-    LBD, fvar_dico, fsol_dico = solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Con, nbPoints=nbProbe)  
+    LBD, fvar_dico, fsol_dico, cardSN, SX = solve2SPA(m2SPA, :Gurobi, :Dichotomy, :Con, nbPoints=nbProbe)  
 
     # --------------------------------------------------------------------------
 
@@ -88,8 +88,7 @@ function main(fname::String)
         println("\nPISTE 2: deux_resolutions ----------------------------------------------------\n")
 
         C, A = parse2SPA(fname)
-        jsp = solve2SPA_2(m2SPA, fvar_dico, C, A)#, :Gurobi, :Dichotomy, :Con, nbPoints=nbProbe) 
-
+        tot1, tot2 = fonction_deux_resolutions(cardSN, m2SPA, C, A, SX)
     end
 
 
@@ -159,13 +158,17 @@ function main(fname::String)
         # LBD : generteurs obtenus avec une dichotomie
         plot(LBD[1,:], LBD[2,:], c="blue", marker="o", linestyle="dotted", label=L"$LB$ dic", markersize=5, zorder=4) 
 
+        if deux_resolutions
+            scatter(tot1, tot2, c="black", marker="*", s=80, label="Solutions R&R", zorder=5)
+        end
+
         if penalite_ponderee
             scatter(y_ones_opti[1, :], y_ones_opti[2, :], c="chocolate"     , marker="*", s=80, label="opti ones", zorder=5)
-            scatter(y_wsum_opti[1, :], y_wsum_opti[2, :], c="darkturquoise"          , marker="*", s=80, label="opti wsum", zorder=6)
+            scatter(y_wsum_opti[1, :], y_wsum_opti[2, :], c="darkturquoise" , marker="*", s=80, label="opti wsum", zorder=6)
             scatter(y_wspa_opti[1, :], y_wspa_opti[2, :], c="mediumpurple"  , marker="*", s=80, label="opti wspa", zorder=7)
 
             scatter(y_ones[1, :], y_ones[2, :], c="saddlebrown"     , marker="1", s=80, label="new sol ones", zorder=8)        
-            scatter(y_wsum[1, :], y_wsum[2, :], c="cadetblue"   , marker="2", s=80, label="new sol wsum", zorder=9)
+            scatter(y_wsum[1, :], y_wsum[2, :], c="cadetblue"       , marker="2", s=80, label="new sol wsum", zorder=9)
             scatter(y_wspa[1, :], y_wspa[2, :], c="rebeccapurple"   , marker="3", s=80, label="new sol wspa", zorder=10)
         end
 
@@ -211,11 +214,11 @@ else
     #@time main(target*"/bio"*"sppnw10.txt")
     #@time main(target*"/bio"*"sppnw20.txt")
     #@time main(target*"/bio"*"sppnw25.txt")
-    #@time main(target*"/bio"*"didactic3.txt")
+    @time main(target*"/bio"*"didactic3.txt")
     #@time main(target*"/bio"*"didactic5.txt")
     #@time main(target*"/bio"*"sppnw29.txt")
     #@time main(target*"/bio"*"sppnw19.txt")
-    @time main(target*"/bio"*"sppnw40.txt")
+    #@time main(target*"/bio"*"sppnw40.txt")
 end
 
 nothing
