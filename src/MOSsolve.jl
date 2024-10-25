@@ -66,8 +66,6 @@ function solve2SPA(
 
     fsol = zeros(Number,nbvar,cardSN)
 
-    #println("\n\n\n  ooooooo   \n\n\n ")
-    @show typeof(cardSN)
     verbose ? println("  cardSN = $cardSN") : nothing
 
     SN = Array{Number}(undef,2,cardSN)
@@ -94,17 +92,15 @@ function solve2SPA(
 
     verbose ? println("  nbVar = $nbvar  moyNbFrac = ",sumNbFrac/cardSN, " ⇒ ", round(100*sumNbFrac/cardSN/nbvar, digits=2),"%") : nothing
 
-    x_value = []
     nf = 0
     n1 = 0
-    n1_vect::Vector{Int64} = Vector{Int64}()
     nf_vect::Vector{Int64} = Vector{Int64}()
-    xcount = zeros(nbvar)
+
     @printf("   i:   #0   #1   #f \n")
     for y in 1:cardSN
         n0 = 0; n1 = 0; nf = 0
         x =  value.(m2SPA[:x]; result = y)
-        #x_value = value.(x; result = y)
+
         for j in 1:length(x)
             if     x[j] <= 0.1
                 n0 +=1
@@ -115,8 +111,6 @@ function solve2SPA(
             end
         end
         @printf(" %3d: %4d %4d %4d \n", y, n0, n1, nf)
-
-        push!(n1_vect,n1)
         
         if (nf == 0)
             nothing
@@ -190,16 +184,17 @@ function fonction_deux_resolutions(cardSN, m2SPA, C, A, SX)
             
             # Conversion des indices fractionnaires en binaires
             for k in idf
-                println("k: $k")
+                #println("k: $k")
                 set_binary(xPrim[k])
             end
             
             # Configuration du solveur
             set_optimizer(m2SPA_2, Gurobi.Optimizer)
+
+            set_silent(m2SPA_2)
             
             # Optimisation du nouveau modèle
             optimize!(m2SPA_2)
-                        
             
             # Vérification du statut de la solution
             if termination_status(m2SPA_2) == OPTIMAL

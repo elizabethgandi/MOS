@@ -39,7 +39,7 @@ function examineVectorVariables2(x)
         end
     end
 
-    @show totVariablesFrac
+    #@show totVariablesFrac
 
     return nbUns,nbFrac, idf
 end
