@@ -86,7 +86,6 @@ function main(fname::String)
     # PISTE 2: FIXATION DES 0 À 0 ET RESOLUTION EXACTE SUR LES VALEURS À FRAC ET 1
     if deux_resolutions
         println("\nPISTE 2: deux_resolutions ----------------------------------------------------\n")
-
         C, A = parse2SPA(fname)
         tot1, tot2 = fonction_deux_resolutions(cardSN, m2SPA, C, A, SX)
     end
@@ -209,10 +208,10 @@ else
     #@time main(target*"/bio"*"sppnw03.txt")
     #@time main(target*"/bio"*"sppnw03.txt")
     #@time main(target*"/bio"*"sppnw04.txt")
-    @time main(target*"/bio"*"sppnw10.txt")
+    #@time main(target*"/bio"*"sppnw10.txt")
     #@time main(target*"/bio"*"sppnw20.txt")
     #@time main(target*"/bio"*"sppnw25.txt")
-    #@time main(target*"/bio"*"didactic3.txt")
+    @time main(target*"/bio"*"didactic3.txt")
     #@time main(target*"/bio"*"didactic5.txt")
     #@time main(target*"/bio"*"sppnw29.txt")
     #@time main(target*"/bio"*"sppnw19.txt")
