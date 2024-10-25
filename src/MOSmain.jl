@@ -11,7 +11,7 @@ global exact             = false
 global experiment        = false
 global dichotomique      = true
 global deux_resolutions  = true
-global penalite_ponderee = false
+global penalite_ponderee = true
 
 print("  verbose............: "); verbose           ? println("yes") : println("no") 
 print("  graphics...........: "); graphic           ? println("yes") : println("no") 
@@ -91,6 +91,8 @@ function main(fname::String)
     end
 
 
+    # --------------------------------------------------------------------------
+
     # PISTE 3: PÉNALISATION DES 0 ET 1
     if penalite_ponderee
         println("\nPISTE 3: Pénalité pondérée ---------------------------------------------------\n")
@@ -156,7 +158,7 @@ function main(fname::String)
         plot(LBD[1,:], LBD[2,:], c="blue", marker="o", linestyle="dotted", label=L"$LB$ dic", markersize=5, zorder=4) 
 
         if deux_resolutions
-            scatter(tot1, tot2, c="darkgoldenrod", marker="*", s=80, label="Solutions R&R", zorder=5)
+            scatter(tot1, tot2, c="black", marker="*", s=80, label="Solutions R&R", zorder=5)
         end
 
         if penalite_ponderee
@@ -211,9 +213,9 @@ else
     #@time main(target*"/bio"*"sppnw10.txt")
     #@time main(target*"/bio"*"sppnw20.txt")
     #@time main(target*"/bio"*"sppnw25.txt")
-    @time main(target*"/bio"*"didactic3.txt")
+    #@time main(target*"/bio"*"didactic3.txt")
     #@time main(target*"/bio"*"didactic5.txt")
-    #@time main(target*"/bio"*"sppnw29.txt")
+    @time main(target*"/bio"*"sppnw29.txt")
     #@time main(target*"/bio"*"sppnw19.txt")
     #@time main(target*"/bio"*"sppnw40.txt")
 end

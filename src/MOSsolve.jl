@@ -132,8 +132,6 @@ function solve2SPA(
 end
 
 
-
-
 function fonction_deux_resolutions(cardSN, m2SPA, C, A, SX)
     
     nbvar::Int64 = num_variables(m2SPA)
