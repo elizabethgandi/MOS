@@ -11,7 +11,7 @@ global exact             = false
 global experiment        = false
 global dichotomique      = true
 global deux_resolutions  = true
-global penalite_ponderee = false
+global penalite_ponderee = true
 
 print("  verbose............: "); verbose           ? println("yes") : println("no") 
 print("  graphics...........: "); graphic           ? println("yes") : println("no") 
@@ -47,7 +47,7 @@ function main(fname::String)
     println("  instance = $fname") 
    
     m2SPA::Model = load2SPA(fname)
-    
+
     println("  nbvar    = ",num_variables(m2SPA))
     println("  nbctr    = ",num_constraints(m2SPA, AffExpr, MOI.EqualTo{Float64}),"\n\n")  
 
