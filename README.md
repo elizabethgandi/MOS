@@ -11,7 +11,7 @@ Générateurs créés en utilisant la méthode de la contrainte-ε et la recherc
 ## Première idée
 À partir de chaque générateur, fixer chaque variable qui était égale à un (resp. zéro) à un (resp. zéro) et résoudre le modèle en recherchant une solution entière. De cette manière, le nombre total de variables sera grandement réduit, ne laissant comme variables que celles avec des valeurs flottantes dans le générateur.
 
-Les résultats ont montré que cette méthode est parfaitement inutile, car fixer la plupart des variables rend le modèle infaisable dans la majorité des cas (si ce n'est dans tous les cas).
+Les résultats ont montré que cette méthode est inutile, car fixer la plupart des variables rend le modèle infaisable dans la majorité des cas (si ce n'est dans tous les cas).
 
 ## Première idée bis
 À partir du générateur de la dichotomie, fixer les variables fractionnaires en variables binaires et de résoudre le problème avec un modèle d'optimisation en nombre entier mixte (MILP). Parallèlement, les variables déjà déterminées à 0 ou 1 dans le générateur sont résolues de manière continue.
