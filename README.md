@@ -1,37 +1,38 @@
 # MOS
 
-## Starting point
-Generators created using ε-constraint and dicotomic search on the realaxed problem (linear relaxation).
+## Point de départ
+Générateurs créés en utilisant la méthode de la contrainte-ε et la recherche dichotomique sur le problème relaxé (relaxation linéaire).
 
- - $I \in \{1,\dots, |I|\}$, the set of variables.
- - $J \in \{1,\dots, |J|\}$, the set of constraints.
- - $A_{ij}, ~ ~ \forall i \in I, \forall j \in J$, the matrix of constraints.
- - $x_{i} \in \{0, 1\}, ~ ~ \forall i \in I$, the binary variables.
+- $I \in \{1,\dots, |I|\}$, l'ensemble des variables.
+- $J \in \{1,\dots, |J|\}$, l'ensemble des contraintes.
+- $A_{ij}, ~ ~ \forall i \in I, \forall j \in J$, la matrice des contraintes.
+- $x_{i} \in \{0, 1\}, ~ ~ \forall i \in I$, les variables binaires.
 
-## First idea
-Starting from each generator, fix each variable which were set to one (resp. zero) to one (resp. zero) and solve the model aiming for an integer solution. This way the total number of variable will greatly deminish leaving as variable only the one with floating values in the generator.
+## Première idée
+À partir de chaque générateur, fixer chaque variable qui était égale à un (resp. zéro) à un (resp. zéro) et résoudre le modèle en recherchant une solution entière. De cette manière, le nombre total de variables sera grandement réduit, ne laissant comme variables que celles avec des valeurs flottantes dans le générateur.
 
-The reasult shown this method to be perfectly useless as fixing most variable reder the model infeasible in most case (if not all).
+Les résultats ont montré que cette méthode est parfaitement inutile, car fixer la plupart des variables rend le modèle infaisable dans la majorité des cas (si ce n'est dans tous les cas).
 
-## Second idea 
-Starting from each generator, compute an integer solution that minimize only the difference between the floating generator and a newly computed integer solution. 
+## Première idée bis
+À partir du générateur de la dichotomie, fixer les variables fractionnaires en variables binaires et de résoudre le problème avec un modèle d'optimisation en nombre entier mixte (MILP). Parallèlement, les variables déjà déterminées à 0 ou 1 dans le générateur sont résolues de manière continue.
 
-Thus we introduce $y$ a binary variable to determine if a variable changed of value compared to the generator.
- - $I' \subset I$, include each variable index where the generator has for value one or zero.
- - $y_{i} \in \{0, 1\}, ~ ~ \forall i \in I'$, is equal to $1$ if the value of the solution for the variable of index $i$ is differrent of the generator one. Otherwise $0$.
+## Deuxième idée
+À partir de chaque générateur, calculer une solution entière qui minimise uniquement la différence entre le générateur flottant et une nouvelle solution entière calculée.
 
-To enforce the $y$ behavior we add two type of constraint to the model. For each variable which were equal to one in the generator will be penalized if switched to zero: 
-$x_i ≥ 1 - y_i$.
-Reciprocly the variables set to zero in the generator will penalize the function if switched to one.
-$x_i ≤ y_i$.
+Pour cela, nous introduisons $y$, une variable binaire pour déterminer si une variable a changé de valeur par rapport au générateur.
+- $I' \subset I$, inclut chaque indice de variable où le générateur a pour valeur un ou zéro.
+- $y_{i} \in \{0, 1\}, ~ ~ \forall i \in I'$, est égal à $1$ si la valeur de la solution pour la variable d'indice $i$ est différente de celle du générateur. Sinon, $0$.
 
-The last step if to compute how much switching a variable will penalize the solution. In first place we will experience a couple of different objective function.
+Pour imposer le comportement de $y$, nous ajoutons deux types de contraintes au modèle. Pour chaque variable qui était égale à un dans le générateur, une pénalité est appliquée si elle est changée à zéro :
+$x_i \geq 1 - y_i$.
+Réciproquement, les variables fixées à zéro dans le générateur pénaliseront la fonction si elles sont changées à un :
+$x_i \leq y_i$.
 
- - **Penality of one: (ones)** switching a variable will be penalized by one: 
-$$\min \sum_{i \in I} y_i$$
- - **Weighted sum: (wsum)** the penality will be proportional to each objective function: 
-$$\min \sum_{j \in J} y_j \cdot \frac{c_{1j} + c_{2j}}{\max_{k \in I}(c_{1k}) + \max_{k \in I}(c_{2k})}$$
- - **SPA interest: (wspa)** the penality will depend on the intterest toward the variable in the context of a SPA problem:
-$$\min \sum_{i \in I} y_i \cdot \frac{c_{1i} + c_{2i}}{\sum_{j \in J} A_{ij}}$$
+La dernière étape consiste à calculer à quel point le changement d'une variable pénalisera la solution. Dans un premier temps, nous testerons différentes fonctions objectives.
 
-![sppaa02-filtered-opti.png](SPA/results/sppaa02-filtered-opti.png)
+- **Pénalité d'une unité (ones)** : changer une variable est pénalisé par un :
+  $$\min \sum_{i \in I} y_i$$
+- **Somme pondérée (wsum)** : la pénalité sera proportionnelle à chaque fonction objective :
+  $$\min \sum_{j \in J} y_j \cdot \frac{c_{1j} + c_{2j}}{\max_{k \in I}(c_{1k}) + \max_{k \in I}(c_{2k})}$$
+- **Intérêt SPA (wspa)** : la pénalité dépendra de l'importance de la variable dans le contexte d'un problème SPA :
+  $$\min \sum_{i \in I} y_i \cdot \frac{c_{1i} + c_{2i}}{\sum_{j \in J} A_{ij}}$$
